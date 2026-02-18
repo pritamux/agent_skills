@@ -1,213 +1,210 @@
-# Agent Skills Repository
+# Agent Skills
 
-> A curated collection of structured skill instructions and workflow guidelines for AI agents like Claude Code and Conductor
+> A curated collection of structured skill instructions and workflow guidelines for AI agents like Claude Code, Conductor, and other AI-powered development tools.
 
-## 🎯 Purpose
+## Overview
 
-This repository contains professionally crafted skill files that serve as actionable instruction sets for AI development agents. Each markdown file provides comprehensive guidelines, best practices, and systematic workflows that AI systems can reference and follow when performing specific software development tasks.
+This repository contains professionally crafted skill files that provide AI agents with clear, actionable instructions for various software development tasks. Each skill file is designed to be referenced by AI systems to enhance their capabilities and ensure consistent, high-quality outputs.
 
-## 🤖 Compatible AI Systems
+## What are Agent Skills?
 
-These skill files are designed to work with:
-- **Claude Code** - Anthropic's AI coding assistant
-- **Conductor** - AI workflow orchestration systems
-- **GitHub Copilot Workspace** - AI-powered development environments
-- **Custom AI Agents** - Any LLM-based development assistant
+Agent skills are structured markdown files that contain:
+- **Clear objectives**: What the AI should accomplish
+- **Step-by-step workflows**: How to approach tasks systematically
+- **Best practices**: Industry standards and proven methodologies
+- **Examples**: Concrete illustrations of expected outputs
+- **Quality criteria**: How to evaluate and validate results
 
-## 📚 How to Use These Skills
+## Available Skills
 
-### For AI Agents
+### 🎨 Design & Development
 
-AI systems can reference these files to:
-1. **Understand workflow expectations** - Follow established patterns and methodologies
-2. **Apply best practices** - Implement industry-standard approaches automatically
-3. **Maintain consistency** - Ensure uniform code quality and documentation
-4. **Execute systematic processes** - Follow step-by-step procedures for complex tasks
+#### [design-claude.md](./design-claude.md)
+Comprehensive design engineering workflow covering:
+- Design systems integration
+- Component creation and documentation
+- Design-to-code workflows
+- Collaborative design processes
+- Design token management
 
-### Integration Methods
+#### [component-builder.md](./component-builder.md)
+UI component development best practices including:
+- React/Next.js patterns and conventions
+- Component architecture and composition
+- Responsive design principles
+- Accessibility standards (WCAG 2.1)
+- Testing strategies for components
 
-#### Method 1: Direct Reference
+#### [rauno-standard.md](./rauno-standard.md)
+Recursive design evaluation methodology featuring:
+- Design critique frameworks
+- Iterative improvement processes
+- Quality assessment standards
+- Visual hierarchy analysis
+- User experience optimization
+
+## Usage Instructions
+
+### For AI Agents (Claude Code, Conductor, etc.)
+
+When working on a task, AI agents can reference these skill files to:
+
+1. **Understand context**: Read the skill file relevant to the current task
+2. **Follow workflows**: Apply the step-by-step processes outlined
+3. **Apply standards**: Ensure outputs meet quality criteria specified
+4. **Validate results**: Use checklists to verify completeness
+
+### For Developers
+
+You can prompt AI agents to use these skills:
+
 ```markdown
-Agent, follow the guidelines in `design-claude.md` to complete the design handoff.
+# Example Prompt
+
+"Please review the design-claude.md skill file and help me create 
+a new button component following the design system guidelines."
 ```
 
-#### Method 2: Context Injection
-```python
-# Load skill file as context
-with open('component-builder.md', 'r') as f:
-    skill_context = f.read()
-    
-# Pass to AI agent
-agent.execute(task="Build a Button component", context=skill_context)
+```markdown
+# Another Example
+
+"Using the component-builder.md standards, build a responsive 
+card component with proper accessibility features."
 ```
 
-#### Method 3: System Prompt Integration
+### Integration Examples
+
+#### Claude Code (Artifacts)
+
 ```
-System: You are an AI development assistant. When building components, 
-refer to the guidelines in component-builder.md for architecture, 
-accessibility, and documentation standards.
+@agent-skills/design-claude.md
+
+Create a design system color palette component with proper 
+token structure and documentation.
 ```
 
-#### Method 4: Workflow Automation
+#### Conductor
+
 ```yaml
-# GitHub Actions / CI/CD
-steps:
-  - name: AI Code Review
-    run: |
-      curl https://raw.githubusercontent.com/pritamux/agent_skills/main/code-review.md -o skill.md
-      ai-agent review --skill-file skill.md --pr ${{ github.event.pull_request.number }}
+skills:
+  - agent_skills/component-builder.md
+  - agent_skills/rauno-standard.md
+
+task: "Build and critique a new navigation component"
 ```
 
-## 📖 Available Skills
+#### Custom AI Workflows
 
-### Design & Development
-- **[design-claude.md](./design-claude.md)** - Design engineering workflow with handoff processes, design systems integration, and collaborative practices
-- **[component-builder.md](./component-builder.md)** - Comprehensive UI component development including architecture, accessibility, and testing
+```python
+# Load skill context
+with open('agent_skills/component-builder.md', 'r') as f:
+    skill_context = f.read()
 
-### Coming Soon
-- **code-review.md** - Thorough code review methodology
-- **documentation-generation.md** - Technical documentation standards
-- **debugging-process.md** - Systematic debugging approaches
-- **api-design.md** - REST API design best practices
-- **testing-strategy.md** - Comprehensive testing guidelines
-- **refactoring-guidelines.md** - Safe refactoring techniques
-- **performance-optimization.md** - Performance analysis methods
-- **security-audit.md** - Security review checklists
+# Include in AI prompt
+prompt = f"""
+{skill_context}
 
-## 🎓 Skill File Structure
+Task: Create a modal component following the above guidelines.
+"""
+```
+
+## File Structure
 
 Each skill file follows a consistent structure:
 
 ```markdown
-# Skill Title
+# Skill Name
 
-## Overview
-Clear description of the skill's purpose and scope
+## Purpose
+Clear statement of what this skill helps accomplish
 
-## Core Principles
-Fundamental concepts and philosophies
+## Principles
+Core philosophies and approaches
 
-## Workflow / Process
-Step-by-step procedures to follow
+## Workflow
+Step-by-step process to follow
 
-## Best Practices
-Industry-standard approaches and techniques
-
-## Common Pitfalls
-Mistakes to avoid and how to prevent them
-
-## Quality Checklist
-Verification steps to ensure success
-
-## Resources & References
-Additional learning materials
-```
-
-## 🚀 Quick Start Examples
-
-### Example 1: Component Development
-```bash
-# Human instruction to AI agent:
-"Create a Card component following the guidelines in component-builder.md.
-Include accessibility features and comprehensive tests."
-```
-
-### Example 2: Design System Integration
-```bash
-# Human instruction to AI agent:
-"Review the Figma design using design-claude.md workflow.
-Generate component specifications with design tokens."
-```
-
-### Example 3: Custom Workflow
-```bash
-# Combine multiple skills:
-"Using design-claude.md for design analysis and component-builder.md 
-for implementation, create a responsive navigation component."
-```
-
-## 🛠️ Creating Custom Skills
-
-To create your own skill files:
-
-1. **Define the scope** - What specific task or workflow does this cover?
-2. **Structure systematically** - Use clear sections with actionable steps
-3. **Include examples** - Provide concrete code samples and scenarios
-4. **Add validation criteria** - Define what "done" looks like
-5. **Keep it actionable** - Focus on what to do, not just theory
-6. **Test with AI** - Verify that AI agents can follow the instructions
-
-### Skill Template
-```markdown
-# [Skill Name]
-
-## Overview
-[2-3 sentences describing the skill]
-
-## Prerequisites
-- Required knowledge
-- Tools needed
-- Context required
-
-## Process
-### Step 1: [Action]
-- Specific instruction
-- Expected outcome
-
-### Step 2: [Action]
-- Specific instruction
-- Expected outcome
-
-## Validation
-- [ ] Checklist item 1
-- [ ] Checklist item 2
+## Standards
+Specific requirements and criteria
 
 ## Examples
-```code example```
+Concrete illustrations
 
-## Common Issues
-**Issue**: Description
-**Solution**: How to resolve
+## Validation
+How to verify quality and completeness
+
+## Resources
+References and further reading
 ```
 
-## 💡 Best Practices for AI Agent Usage
+## Contributing
 
-1. **Be Specific** - Reference exact sections when giving instructions
-2. **Combine Skills** - Use multiple skill files for complex tasks
-3. **Provide Context** - Share relevant project information alongside skills
-4. **Iterate** - Refine skills based on agent performance
-5. **Version Control** - Track changes to skill files as requirements evolve
+To add new skills or improve existing ones:
 
-## 🤝 Contributing
+1. **Maintain clarity**: Use clear, concise language
+2. **Be actionable**: Provide specific steps, not vague guidance
+3. **Include examples**: Show, don't just tell
+4. **Add validation criteria**: Define what "done" looks like
+5. **Keep it focused**: One skill per file
 
-Contributions are welcome! To add new skills or improve existing ones:
+## Best Practices for Skill Files
 
-1. Fork this repository
-2. Create a feature branch (`git checkout -b skill/new-skill-name`)
-3. Follow the skill file structure outlined above
-4. Test with an AI agent to ensure clarity
-5. Submit a pull request with:
-   - Clear description of the skill
-   - Use cases and examples
-   - Testing results with AI agents
+### ✅ Do:
+- Use clear, hierarchical headings
+- Provide concrete examples with code blocks
+- Include checklists for validation
+- Reference industry standards
+- Keep content up-to-date
 
-## 📝 License
+### ❌ Don't:
+- Use vague or ambiguous language
+- Overcomplicate with unnecessary details
+- Assume prior knowledge without context
+- Mix multiple unrelated skills in one file
 
-MIT License - Feel free to use these skills in your projects, customize them for your team, or integrate them into your AI agent workflows.
+## Skill Development Roadmap
 
-## 🔗 Related Resources
+Planned future skills:
+- **testing-strategy.md**: Comprehensive testing approaches
+- **api-design.md**: REST API design best practices
+- **performance-optimization.md**: Performance analysis techniques
+- **security-audit.md**: Security review workflows
+- **code-review.md**: Systematic code review process
+- **documentation-generation.md**: Technical documentation standards
 
-- [Anthropic Claude Documentation](https://docs.anthropic.com/)
-- [GitHub Copilot Best Practices](https://github.blog/)
-- [Prompt Engineering Guide](https://www.promptingguide.ai/)
-- [AI-Assisted Development Patterns](https://martinfowler.com/)
+## Use Cases
 
-## 📬 Feedback
+### 1. Onboarding AI Agents
+Provide context-rich instructions for AI systems joining a project
 
-Have suggestions for new skills or improvements? Open an issue or reach out!
+### 2. Standardizing Workflows
+Ensure consistent approaches across different AI-assisted tasks
+
+### 3. Quality Assurance
+Define clear criteria for evaluating AI-generated outputs
+
+### 4. Learning Resource
+Help developers understand best practices through AI-readable formats
+
+### 5. Documentation
+Serve as living documentation for team standards and processes
+
+## Version Control
+
+Skill files are versioned through Git. Each significant update should:
+- Include clear commit messages
+- Update the relevant sections
+- Maintain backward compatibility when possible
+- Document breaking changes in commit messages
+
+## License
+
+Feel free to use, modify, and distribute these skill files for your projects.
+
+## Feedback
+
+Have suggestions for new skills or improvements? Open an issue or submit a pull request!
 
 ---
 
-**Made with 🤖 for AI Agents by Humans**
-
-*Last Updated: February 2026*
+**Made for AI agents, by humans who work with them** 🤖✨

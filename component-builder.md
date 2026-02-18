@@ -1,1086 +1,738 @@
 # UI Component Builder
 
-> Comprehensive skill file for building production-ready UI components with focus on architecture, accessibility, testing, and documentation
+## Purpose
 
-## Overview
-
-This skill provides a systematic approach to building reusable, accessible, and well-tested UI components. It covers architecture decisions, naming conventions, accessibility standards, comprehensive testing strategies, and documentation practices that ensure components are maintainable and developer-friendly.
-
-**Target Role**: Frontend Developer, UI Engineer, Component Library Maintainer  
-**Scope**: Component design, implementation, testing, and documentation  
-**Output**: Production-ready, accessible, well-documented UI components
+This skill provides comprehensive guidelines for building production-ready UI components with a focus on React/Next.js ecosystems. It covers component architecture, naming conventions, accessibility standards, testing approaches, and documentation.
 
 ## Core Principles
 
-### 1. Composability
-- Build small, focused components that do one thing well
-- Compose complex UIs from simple, reusable building blocks
-- Avoid monolithic components with too many responsibilities
+### 1. Composition Over Inheritance
+- Build components that can be easily composed together
+- Use slots/children patterns for flexibility
+- Avoid deep component hierarchies
 
-### 2. Accessibility by Default
-- Every component must be usable by everyone
-- Follow WCAG 2.1 Level AA standards minimum
-- Test with keyboard, screen readers, and assistive technologies
+### 2. Accessibility First
+- Every component must be keyboard accessible
+- Screen reader support is mandatory
+- Follow WCAG 2.1 Level AA guidelines
+- Test with real assistive technologies
 
-### 3. API Design
-- Intuitive and consistent prop interfaces
-- Sensible defaults that work for 80% of use cases
-- Flexibility for advanced use cases
-
-### 4. Performance
-- Optimize for rendering performance
+### 3. Performance by Default
 - Lazy load when appropriate
-- Minimize bundle size impact
+- Memoize expensive computations
+- Minimize re-renders
+- Optimize bundle size
 
-### 5. Developer Experience
-- Clear, comprehensive documentation
-- Helpful error messages
-- TypeScript support with accurate types
+### 4. Type Safety
+- Use TypeScript for all components
+- Define clear, explicit prop types
+- Leverage type inference where possible
 
 ## Component Architecture
 
-### Directory Structure
-```
-components/
-├── Button/
-│   ├── Button.tsx           # Main component
-│   ├── Button.types.ts      # TypeScript types
-│   ├── Button.styles.ts     # Styles (CSS-in-JS or class variants)
-│   ├── Button.test.tsx      # Unit tests
-│   ├── Button.stories.tsx   # Storybook stories
-│   ├── Button.spec.tsx      # E2E/integration tests
-│   ├── index.ts            # Public exports
-│   └── README.md           # Component documentation
-├── Input/
-│   ├── Input.tsx
-│   ├── Input.types.ts
-│   └── ...
-└── ...
-```
+### Basic Structure
 
-### Component Anatomy
-
-#### 1. Types Definition (Component.types.ts)
-```typescript
-import { ComponentPropsWithoutRef, ReactNode } from 'react';
-
-/**
- * Base props that extend native HTML button attributes
- */
-export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
-  /**
-   * Visual style variant of the button
-   * @default 'primary'
-   */
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-
-  /**
-   * Size of the button
-   * @default 'md'
-   */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-
-  /**
-   * Disabled state - prevents interaction
-   * @default false
-   */
-  disabled?: boolean;
-
-  /**
-   * Loading state - shows spinner and prevents interaction
-   * @default false
-   */
-  loading?: boolean;
-
-  /**
-   * Makes button full width
-   * @default false
-   */
-  fullWidth?: boolean;
-
-  /**
-   * Icon element to display before children
-   */
-  leftIcon?: ReactNode;
-
-  /**
-   * Icon element to display after children
-   */
-  rightIcon?: ReactNode;
-
-  /**
-   * Content of the button
-   */
-  children: ReactNode;
-}
-
-/**
- * Internal component state (if needed)
- */
-export interface ButtonState {
-  isFocused: boolean;
-  isPressed: boolean;
-}
-```
-
-#### 2. Styles (Component.styles.ts)
-```typescript
-import { cva, type VariantProps } from 'class-variance-authority';
-
-/**
- * Button style variants using CVA (Class Variance Authority)
- */
-export const buttonStyles = cva(
-  // Base styles applied to all variants
-  [
-    'inline-flex items-center justify-center',
-    'font-medium rounded-lg',
-    'transition-all duration-200',
-    'focus:outline-none focus:ring-2 focus:ring-offset-2',
-    'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
-  ],
-  {
-    variants: {
-      variant: {
-        primary: [
-          'bg-blue-600 text-white',
-          'hover:bg-blue-700',
-          'active:bg-blue-800',
-          'focus:ring-blue-500',
-        ],
-        secondary: [
-          'bg-gray-600 text-white',
-          'hover:bg-gray-700',
-          'active:bg-gray-800',
-          'focus:ring-gray-500',
-        ],
-        outline: [
-          'border-2 border-gray-300 text-gray-700 bg-transparent',
-          'hover:border-gray-400 hover:bg-gray-50',
-          'active:bg-gray-100',
-          'focus:ring-gray-500',
-        ],
-        ghost: [
-          'text-gray-700 bg-transparent',
-          'hover:bg-gray-100',
-          'active:bg-gray-200',
-          'focus:ring-gray-500',
-        ],
-        danger: [
-          'bg-red-600 text-white',
-          'hover:bg-red-700',
-          'active:bg-red-800',
-          'focus:ring-red-500',
-        ],
-      },
-      size: {
-        xs: 'text-xs px-2 py-1 gap-1',
-        sm: 'text-sm px-3 py-1.5 gap-1.5',
-        md: 'text-base px-4 py-2 gap-2',
-        lg: 'text-lg px-5 py-2.5 gap-2.5',
-        xl: 'text-xl px-6 py-3 gap-3',
-      },
-      fullWidth: {
-        true: 'w-full',
-        false: 'w-auto',
-      },
-    },
-    defaultVariants: {
-      variant: 'primary',
-      size: 'md',
-      fullWidth: false,
-    },
-  }
-);
-
-export type ButtonStylesProps = VariantProps<typeof buttonStyles>;
-
-/**
- * Icon wrapper styles
- */
-export const iconStyles = cva('flex-shrink-0', {
-  variants: {
-    size: {
-      xs: 'w-3 h-3',
-      sm: 'w-4 h-4',
-      md: 'w-5 h-5',
-      lg: 'w-6 h-6',
-      xl: 'w-7 h-7',
-    },
-  },
-});
-```
-
-#### 3. Component Implementation (Component.tsx)
-```typescript
+```tsx
+// ComponentName.tsx
 import React, { forwardRef } from 'react';
-import { buttonStyles, iconStyles } from './Button.styles';
-import { ButtonProps } from './Button.types';
-import { Spinner } from '../Spinner';
+import { cn } from '@/lib/utils';
+import type { ComponentNameProps } from './ComponentName.types';
+import { componentVariants } from './ComponentName.variants';
 
-/**
- * Button component - Primary action trigger
- * 
- * @example
- * ```tsx
- * <Button variant="primary" onClick={handleClick}>
- *   Click me
- * </Button>
- * ```
- */
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+export const ComponentName = forwardRef<HTMLDivElement, ComponentNameProps>(
   (
     {
-      variant = 'primary',
-      size = 'md',
-      disabled = false,
-      loading = false,
-      fullWidth = false,
-      leftIcon,
-      rightIcon,
       children,
+      variant = 'default',
+      size = 'md',
       className,
-      onClick,
-      type = 'button',
       ...props
     },
     ref
   ) => {
-    // Combine disabled states
-    const isDisabled = disabled || loading;
-
-    // Handle click with loading state
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (loading || disabled) {
-        event.preventDefault();
-        return;
-      }
-      onClick?.(event);
-    };
-
     return (
-      <button
+      <div
         ref={ref}
-        type={type}
-        className={buttonStyles({ variant, size, fullWidth, className })}
-        disabled={isDisabled}
-        onClick={handleClick}
-        aria-busy={loading}
-        aria-disabled={isDisabled}
+        className={cn(componentVariants({ variant, size }), className)}
         {...props}
       >
-        {/* Loading spinner */}
-        {loading && (
-          <Spinner
-            size={size}
-            className={iconStyles({ size })}
-            aria-label="Loading"
-          />
-        )}
-
-        {/* Left icon */}
-        {leftIcon && !loading && (
-          <span className={iconStyles({ size })} aria-hidden="true">
-            {leftIcon}
-          </span>
-        )}
-
-        {/* Button text */}
-        <span>{children}</span>
-
-        {/* Right icon */}
-        {rightIcon && (
-          <span className={iconStyles({ size })} aria-hidden="true">
-            {rightIcon}
-          </span>
-        )}
-      </button>
+        {children}
+      </div>
     );
   }
 );
 
-Button.displayName = 'Button';
+ComponentName.displayName = 'ComponentName';
 ```
 
-#### 4. Public Exports (index.ts)
+### TypeScript Interfaces
+
 ```typescript
-export { Button } from './Button';
-export type { ButtonProps } from './Button.types';
-export { buttonStyles } from './Button.styles';
+// ComponentName.types.ts
+import { VariantProps } from 'class-variance-authority';
+import { componentVariants } from './ComponentName.variants';
+
+// Base props interface
+export interface ComponentNameProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof componentVariants> {
+  /**
+   * The content to render inside the component
+   */
+  children: React.ReactNode;
+  
+  /**
+   * Custom CSS class to apply
+   */
+  className?: string;
+  
+  /**
+   * Whether the component is disabled
+   * @default false
+   */
+  isDisabled?: boolean;
+  
+  /**
+   * Callback fired when component is clicked
+   */
+  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+}
+
+// Polymorphic component types (for components that can render as different elements)
+export type PolymorphicComponentProps<E extends React.ElementType> = {
+  as?: E;
+} & Omit<React.ComponentPropsWithoutRef<E>, 'as'>;
+```
+
+### Variant Management
+
+```typescript
+// ComponentName.variants.ts
+import { cva } from 'class-variance-authority';
+
+export const componentVariants = cva(
+  // Base styles - applied to all variants
+  'inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary-500 text-white hover:bg-primary-600',
+        secondary: 'bg-secondary-500 text-white hover:bg-secondary-600',
+        outline: 'border-2 border-primary-500 text-primary-500 hover:bg-primary-50',
+        ghost: 'text-primary-500 hover:bg-primary-100',
+        danger: 'bg-red-500 text-white hover:bg-red-600'
+      },
+      size: {
+        sm: 'h-8 px-3 text-sm',
+        md: 'h-10 px-4 text-base',
+        lg: 'h-12 px-6 text-lg'
+      },
+      rounded: {
+        none: 'rounded-none',
+        sm: 'rounded-sm',
+        md: 'rounded-md',
+        lg: 'rounded-lg',
+        full: 'rounded-full'
+      }
+    },
+    compoundVariants: [
+      {
+        variant: 'outline',
+        size: 'sm',
+        className: 'border-[1.5px]'
+      }
+    ],
+    defaultVariants: {
+      variant: 'default',
+      size: 'md',
+      rounded: 'md'
+    }
+  }
+);
 ```
 
 ## Naming Conventions
 
 ### Component Names
-```typescript
-// ✅ Good: Clear, descriptive, PascalCase
-Button
-TextField
-DropdownMenu
-NavigationBar
-ProductCard
 
-// ❌ Bad: Unclear, abbreviated
-Btn
-TF
-Dropdown  // Too generic
-NavBar    // Abbreviated
-Card      // Too generic
+```
+✅ Good:
+- Button
+- Card
+- NavigationMenu
+- UserAvatar
+- SearchInput
+
+❌ Bad:
+- button (not PascalCase)
+- BTN (unclear abbreviation)
+- TheButton (unnecessary article)
+- MyButton (possessive prefix)
 ```
 
 ### Props Naming
-```typescript
-// ✅ Good: Clear intent, consistent patterns
-interface ComponentProps {
-  isDisabled: boolean;      // Boolean with 'is', 'has', 'should'
-  hasError: boolean;
-  shouldAutoFocus: boolean;
-  
-  onSubmit: () => void;     // Event handlers with 'on' prefix
-  onClick: () => void;
-  onChange: (value: string) => void;
-  
-  variant: 'primary';       // Enums without prefix
-  size: 'large';
-  
-  leftIcon: ReactNode;      // Position descriptors
-  rightIcon: ReactNode;
-}
 
-// ❌ Bad: Inconsistent, unclear
-interface ComponentProps {
-  disabled: boolean;        // Missing 'is' prefix
-  error: boolean;           // Missing 'has' prefix
-  
-  submit: () => void;       // Missing 'on' prefix
-  clickHandler: () => void; // Inconsistent pattern
-  
-  buttonVariant: 'primary'; // Redundant prefix
-  btnSize: 'large';         // Abbreviated
-}
+```typescript
+// Boolean props: use "is" or "has" prefix
+isDisabled, isLoading, isActive, hasError, hasIcon
+
+// Event handlers: use "on" prefix
+onClick, onChange, onSubmit, onFocus, onBlur
+
+// Callback props: use "on" prefix
+onComplete, onSuccess, onError
+
+// Render props: use "render" prefix
+renderHeader, renderFooter, renderItem
+
+// Size/variant props: use enum-style strings
+variant: 'primary' | 'secondary' | 'outline'
+size: 'sm' | 'md' | 'lg'
 ```
 
 ### File Naming
-```
-// ✅ Good: Consistent, descriptive
-Button.tsx
-Button.types.ts
-Button.styles.ts
-Button.test.tsx
-Button.stories.tsx
 
-// ❌ Bad: Inconsistent patterns
-button.tsx
-ButtonTypes.ts
-buttonstyles.ts
-button.spec.tsx
-Button.story.tsx
+```
+components/
+├── Button/
+│   ├── Button.tsx              # Main component
+│   ├── Button.types.ts         # TypeScript types
+│   ├── Button.variants.ts      # CVA variants
+│   ├── Button.stories.tsx      # Storybook stories
+│   ├── Button.test.tsx         # Jest/RTL tests
+│   ├── Button.spec.ts          # E2E tests (Playwright)
+│   ├── ButtonGroup.tsx         # Related sub-component
+│   └── index.ts                # Public exports
 ```
 
-## Accessibility Standards
+## Composition Patterns
 
-### WCAG 2.1 Level AA Requirements
+### Compound Components
 
-#### 1. Keyboard Navigation
-```typescript
-const AccessibleButton = () => {
+```tsx
+// Card.tsx
+import { createContext, useContext } from 'react';
+
+const CardContext = createContext<{ variant: string } | undefined>(undefined);
+
+export const Card = ({ variant = 'default', children, ...props }) => (
+  <CardContext.Provider value={{ variant }}>
+    <div className={cn('rounded-lg border', cardVariants({ variant }))} {...props}>
+      {children}
+    </div>
+  </CardContext.Provider>
+);
+
+export const CardHeader = ({ children, ...props }) => (
+  <div className="px-6 py-4 border-b" {...props}>
+    {children}
+  </div>
+);
+
+export const CardContent = ({ children, ...props }) => (
+  <div className="px-6 py-4" {...props}>
+    {children}
+  </div>
+);
+
+export const CardFooter = ({ children, ...props }) => (
+  <div className="px-6 py-4 border-t" {...props}>
+    {children}
+  </div>
+);
+
+// Usage
+<Card variant="elevated">
+  <CardHeader>Title</CardHeader>
+  <CardContent>Content here</CardContent>
+  <CardFooter>Footer actions</CardFooter>
+</Card>
+```
+
+### Render Props Pattern
+
+```tsx
+interface DataListProps<T> {
+  data: T[];
+  renderItem: (item: T, index: number) => React.ReactNode;
+  renderEmpty?: () => React.ReactNode;
+  isLoading?: boolean;
+}
+
+export const DataList = <T,>({
+  data,
+  renderItem,
+  renderEmpty = () => <p>No items found</p>,
+  isLoading = false
+}: DataListProps<T>) => {
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+  
+  if (data.length === 0) {
+    return renderEmpty();
+  }
+  
   return (
-    <button
-      onKeyDown={(e) => {
-        // Space and Enter should trigger button
-        if (e.key === ' ' || e.key === 'Enter') {
-          e.preventDefault();
-          handleClick();
-        }
-      }}
-      tabIndex={0}  // Ensure it's in tab order
-    >
-      Action
-    </button>
-  );
-};
-
-const AccessibleList = () => {
-  return (
-    <ul
-      role="listbox"
-      onKeyDown={(e) => {
-        // Arrow key navigation
-        if (e.key === 'ArrowDown') {
-          focusNextItem();
-        } else if (e.key === 'ArrowUp') {
-          focusPreviousItem();
-        }
-      }}
-    >
-      {items.map((item) => (
-        <li key={item.id} role="option" tabIndex={0}>
-          {item.label}
-        </li>
+    <ul>
+      {data.map((item, index) => (
+        <li key={index}>{renderItem(item, index)}</li>
       ))}
     </ul>
   );
 };
+
+// Usage
+<DataList
+  data={users}
+  renderItem={(user) => <UserCard user={user} />}
+  renderEmpty={() => <EmptyState message="No users found" />}
+/>
 ```
 
-#### 2. ARIA Attributes
-```typescript
-// Labels and descriptions
-<button
-  aria-label="Close dialog"              // When no visible text
-  aria-labelledby="dialog-title"         // Reference to label element
-  aria-describedby="dialog-description"  // Additional context
->
-  <Icon name="close" aria-hidden="true" />  {/* Decorative */}
-</button>
+### Slots Pattern
 
-// States
-<button
-  aria-pressed={isPressed}      // Toggle button state
-  aria-expanded={isExpanded}    // Expandable content
-  aria-disabled={isDisabled}    // Disabled state
-  aria-busy={isLoading}         // Loading state
-  aria-current="page"           // Current navigation item
->
+```tsx
+interface LayoutProps {
+  header?: React.ReactNode;
+  sidebar?: React.ReactNode;
+  content: React.ReactNode;
+  footer?: React.ReactNode;
+}
 
-// Live regions
-<div
-  role="alert"                  // Immediate announcement
-  aria-live="polite"           // Announce when convenient
-  aria-atomic="true"           // Read entire content
->
-  {statusMessage}
-</div>
-
-// Complex widgets
-<div
-  role="dialog"                 // Dialog role
-  aria-modal="true"            // Modal dialog
-  aria-labelledby="dialog-title"
->
-  <h2 id="dialog-title">Confirm Action</h2>
-</div>
+export const Layout = ({ header, sidebar, content, footer }: LayoutProps) => (
+  <div className="min-h-screen flex flex-col">
+    {header && <header className="border-b">{header}</header>}
+    <div className="flex flex-1">
+      {sidebar && <aside className="w-64 border-r">{sidebar}</aside>}
+      <main className="flex-1 p-6">{content}</main>
+    </div>
+    {footer && <footer className="border-t">{footer}</footer>}
+  </div>
+);
 ```
 
-#### 3. Color Contrast
-```typescript
-// Minimum contrast ratios:
-// - Normal text: 4.5:1
-// - Large text (18px+ or 14px+ bold): 3:1
-// - UI components and graphics: 3:1
+## Accessibility Standards
 
-const colorPairs = {
-  // ✅ Good: 7.0:1 contrast
-  text: '#1F2937',      // Gray 800
-  background: '#FFFFFF',
+### WCAG 2.1 Level AA Checklist
+
+#### Perceivable
+- [ ] **Color contrast**: Text has 4.5:1 ratio (3:1 for large text)
+- [ ] **Alternative text**: Images have meaningful alt text
+- [ ] **Adaptable**: Content can be presented in different ways
+
+#### Operable
+- [ ] **Keyboard accessible**: All functionality available via keyboard
+- [ ] **Focus visible**: Clear focus indicators (focus-visible:ring-2)
+- [ ] **No keyboard traps**: Users can navigate away from all elements
+- [ ] **Skip links**: Provide skip to main content links
+
+#### Understandable
+- [ ] **Readable**: Language of page is specified (lang attribute)
+- [ ] **Predictable**: Components behave consistently
+- [ ] **Input assistance**: Clear labels and error messages
+
+#### Robust
+- [ ] **Semantic HTML**: Use correct HTML elements
+- [ ] **ARIA**: Use ARIA attributes when semantic HTML isn't enough
+- [ ] **Valid markup**: Ensure HTML is valid and well-formed
+
+### Accessible Component Examples
+
+#### Button
+
+```tsx
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ children, isLoading, isDisabled, ...props }, ref) => (
+    <button
+      ref={ref}
+      disabled={isDisabled || isLoading}
+      aria-disabled={isDisabled}
+      aria-busy={isLoading}
+      {...props}
+    >
+      {isLoading && (
+        <>
+          <span className="sr-only">Loading...</span>
+          <LoadingIcon aria-hidden="true" />
+        </>
+      )}
+      {children}
+    </button>
+  )
+);
+```
+
+#### Form Input
+
+```tsx
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ label, error, hint, required, ...props }, ref) => {
+    const id = useId();
+    const errorId = `${id}-error`;
+    const hintId = `${id}-hint`;
+    
+    return (
+      <div>
+        <label htmlFor={id} className="block mb-2">
+          {label}
+          {required && <span aria-label="required"> *</span>}
+        </label>
+        
+        {hint && (
+          <p id={hintId} className="text-sm text-gray-600 mb-1">
+            {hint}
+          </p>
+        )}
+        
+        <input
+          ref={ref}
+          id={id}
+          aria-invalid={!!error}
+          aria-describedby={`${error ? errorId : ''} ${hint ? hintId : ''}`.trim()}
+          aria-required={required}
+          {...props}
+        />
+        
+        {error && (
+          <p id={errorId} className="text-sm text-red-600 mt-1" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+);
+```
+
+#### Dialog/Modal
+
+```tsx
+export const Dialog = ({ isOpen, onClose, title, children }) => {
+  const titleId = useId();
   
-  // ✅ Good: 4.6:1 contrast
-  linkText: '#2563EB',  // Blue 600
-  linkBg: '#FFFFFF',
-  
-  // ❌ Bad: 2.9:1 contrast (fails WCAG AA)
-  lightText: '#9CA3AF', // Gray 400
-  lightBg: '#FFFFFF',
-};
-
-// Use tools to verify:
-// - WebAIM Contrast Checker
-// - Chrome DevTools
-// - Axe DevTools
-```
-
-#### 4. Focus Management
-```typescript
-const Modal = ({ isOpen, onClose, children }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-
   useEffect(() => {
-    if (isOpen) {
-      // Save current focus
-      previousFocusRef.current = document.activeElement as HTMLElement;
-      
-      // Move focus to modal
-      modalRef.current?.focus();
-      
-      // Trap focus within modal
-      const handleTab = (e: KeyboardEvent) => {
-        if (e.key === 'Tab') {
-          const focusableElements = modalRef.current?.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-          const firstElement = focusableElements?.[0] as HTMLElement;
-          const lastElement = focusableElements?.[focusableElements.length - 1] as HTMLElement;
-
-          if (e.shiftKey && document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement?.focus();
-          } else if (!e.shiftKey && document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement?.focus();
-          }
-        }
-      };
-
-      document.addEventListener('keydown', handleTab);
-      return () => document.removeEventListener('keydown', handleTab);
-    } else {
-      // Restore focus when modal closes
-      previousFocusRef.current?.focus();
-    }
-  }, [isOpen]);
-
+    if (!isOpen) return;
+    
+    // Trap focus within dialog
+    const previouslyFocused = document.activeElement as HTMLElement;
+    
+    // Handle Escape key
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    
+    document.addEventListener('keydown', handleEscape);
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen, onClose]);
+  
+  if (!isOpen) return null;
+  
   return (
     <div
-      ref={modalRef}
       role="dialog"
       aria-modal="true"
-      tabIndex={-1}
+      aria-labelledby={titleId}
+      className="fixed inset-0 z-50 flex items-center justify-center"
     >
-      {children}
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/50"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      
+      {/* Dialog content */}
+      <div className="relative bg-white rounded-lg p-6 max-w-md">
+        <h2 id={titleId} className="text-xl font-semibold mb-4">
+          {title}
+        </h2>
+        {children}
+      </div>
     </div>
   );
 };
 ```
 
-#### 5. Touch Targets
-```css
-/* Minimum touch target size: 44x44px (iOS) / 48x48px (Android) */
-.button {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 12px 16px;
-}
+## Responsive Design
 
-/* For smaller visual buttons, add transparent padding */
-.icon-button {
-  width: 24px;   /* Visual size */
-  height: 24px;
-  padding: 10px; /* Total: 44x44px touch target */
-}
+### Mobile-First Approach
+
+```tsx
+// Start with mobile styles, enhance for larger screens
+const ResponsiveCard = () => (
+  <div className="
+    // Mobile (default)
+    px-4
+    py-3
+    text-sm
+    flex-col
+    
+    // Tablet (md: 768px+)
+    md:px-6
+    md:py-4
+    md:text-base
+    
+    // Desktop (lg: 1024px+)
+    lg:px-8
+    lg:flex-row
+    lg:items-center
+  ">
+    <div className="mb-4 lg:mb-0 lg:mr-4">
+      <Image src="/avatar.jpg" alt="User" width={48} height={48} />
+    </div>
+    <div>
+      <h3 className="font-semibold">Title</h3>
+      <p className="text-gray-600">Description</p>
+    </div>
+  </div>
+);
 ```
 
-### Accessibility Testing Checklist
-```markdown
-- [ ] Keyboard navigation works (Tab, Shift+Tab, Arrow keys, Enter, Space, Esc)
-- [ ] Focus indicators clearly visible
-- [ ] Screen reader announces all content correctly (test with NVDA/JAWS/VoiceOver)
-- [ ] Color contrast meets WCAG AA standards (4.5:1 for text, 3:1 for UI)
-- [ ] Touch targets minimum 44x44px on mobile
-- [ ] ARIA attributes used correctly
-- [ ] No keyboard traps
-- [ ] Form labels properly associated
-- [ ] Error messages clearly announced
-- [ ] Loading/busy states communicated
-- [ ] Works with browser zoom up to 200%
-- [ ] Works with Windows High Contrast mode
+### Container Queries (Modern Approach)
+
+```tsx
+const ContainerCard = () => (
+  <div className="@container">
+    <div className="
+      grid
+      grid-cols-1
+      @md:grid-cols-2
+      @lg:grid-cols-3
+      gap-4
+    ">
+      {/* Items */}
+    </div>
+  </div>
+);
 ```
 
 ## Testing Strategy
 
-### 1. Unit Tests (Component.test.tsx)
+### Unit Tests (Jest + React Testing Library)
+
 ```typescript
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+// Button.test.tsx
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button } from './Button';
 
 describe('Button', () => {
-  describe('Rendering', () => {
-    it('renders children correctly', () => {
-      render(<Button>Click me</Button>);
-      expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
-    });
-
-    it('applies variant styles', () => {
-      const { rerender } = render(<Button variant="primary">Primary</Button>);
-      const button = screen.getByRole('button');
-      expect(button).toHaveClass('bg-blue-600');
-
-      rerender(<Button variant="danger">Danger</Button>);
-      expect(button).toHaveClass('bg-red-600');
-    });
-
-    it('renders with icons', () => {
-      render(
-        <Button
-          leftIcon={<span data-testid="left-icon">←</span>}
-          rightIcon={<span data-testid="right-icon">→</span>}
-        >
-          Text
-        </Button>
-      );
-      expect(screen.getByTestId('left-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('right-icon')).toBeInTheDocument();
-    });
+  it('renders with children', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
   });
-
-  describe('Interaction', () => {
-    it('calls onClick when clicked', async () => {
-      const handleClick = jest.fn();
-      render(<Button onClick={handleClick}>Click</Button>);
-      
-      await userEvent.click(screen.getByRole('button'));
-      expect(handleClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not call onClick when disabled', async () => {
-      const handleClick = jest.fn();
-      render(<Button disabled onClick={handleClick}>Click</Button>);
-      
-      await userEvent.click(screen.getByRole('button'));
-      expect(handleClick).not.toHaveBeenCalled();
-    });
-
-    it('does not call onClick when loading', async () => {
-      const handleClick = jest.fn();
-      render(<Button loading onClick={handleClick}>Click</Button>);
-      
-      await userEvent.click(screen.getByRole('button'));
-      expect(handleClick).not.toHaveBeenCalled();
-    });
+  
+  it('calls onClick when clicked', async () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    await userEvent.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
   });
-
-  describe('Accessibility', () => {
-    it('is keyboard accessible', async () => {
-      const handleClick = jest.fn();
-      render(<Button onClick={handleClick}>Click</Button>);
-      
-      const button = screen.getByRole('button');
-      button.focus();
-      expect(button).toHaveFocus();
-      
-      await userEvent.keyboard('{Enter}');
-      expect(handleClick).toHaveBeenCalled();
-    });
-
-    it('has correct ARIA attributes when loading', () => {
-      render(<Button loading>Loading</Button>);
-      const button = screen.getByRole('button');
-      expect(button).toHaveAttribute('aria-busy', 'true');
-      expect(button).toHaveAttribute('aria-disabled', 'true');
-    });
-
-    it('meets accessibility standards', async () => {
-      const { container } = render(<Button>Accessible Button</Button>);
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
+  
+  it('does not call onClick when disabled', async () => {
+    const handleClick = jest.fn();
+    render(<Button isDisabled onClick={handleClick}>Click me</Button>);
+    
+    await userEvent.click(screen.getByText('Click me'));
+    expect(handleClick).not.toHaveBeenCalled();
   });
-
-  describe('States', () => {
-    it('shows loading spinner when loading', () => {
-      render(<Button loading>Submit</Button>);
-      expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
-    });
-
-    it('applies disabled styling when disabled', () => {
-      render(<Button disabled>Disabled</Button>);
-      const button = screen.getByRole('button');
-      expect(button).toBeDisabled();
-      expect(button).toHaveClass('disabled:opacity-50');
-    });
+  
+  it('is keyboard accessible', async () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    const button = screen.getByText('Click me');
+    button.focus();
+    expect(button).toHaveFocus();
+    
+    await userEvent.keyboard('{Enter}');
+    expect(handleClick).toHaveBeenCalled();
   });
 });
 ```
 
-### 2. Integration Tests (Component.spec.tsx)
+### Accessibility Tests
+
 ```typescript
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
+
+describe('Button accessibility', () => {
+  it('has no accessibility violations', async () => {
+    const { container } = render(<Button>Click me</Button>);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+});
+```
+
+### Visual Regression Tests (Playwright)
+
+```typescript
+// Button.spec.ts
 import { test, expect } from '@playwright/test';
 
-test.describe('Button Component', () => {
-  test('renders and is interactive', async ({ page }) => {
+test.describe('Button visual tests', () => {
+  test('primary variant matches snapshot', async ({ page }) => {
     await page.goto('/components/button');
-    
-    const button = page.getByRole('button', { name: 'Click me' });
-    await expect(button).toBeVisible();
-    
-    await button.click();
-    await expect(page.getByText('Button clicked!')).toBeVisible();
+    const button = page.locator('[data-testid="button-primary"]');
+    await expect(button).toHaveScreenshot('button-primary.png');
   });
-
-  test('keyboard navigation works', async ({ page }) => {
+  
+  test('hover state matches snapshot', async ({ page }) => {
     await page.goto('/components/button');
-    
-    await page.keyboard.press('Tab');
-    const button = page.getByRole('button').first();
-    await expect(button).toBeFocused();
-    
-    await page.keyboard.press('Enter');
-    await expect(page.getByText('Button clicked!')).toBeVisible();
-  });
-
-  test('works on mobile viewport', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/components/button');
-    
-    const button = page.getByRole('button');
-    const box = await button.boundingBox();
-    
-    // Verify touch target size
-    expect(box?.width).toBeGreaterThanOrEqual(44);
-    expect(box?.height).toBeGreaterThanOrEqual(44);
-  });
-});
-```
-
-### 3. Visual Regression Tests
-```typescript
-// Using Chromatic or Percy
-import { test } from '@playwright/test';
-import percySnapshot from '@percy/playwright';
-
-test.describe('Button Visual Tests', () => {
-  test('captures all button variants', async ({ page }) => {
-    await page.goto('/components/button');
-    await percySnapshot(page, 'Button - All Variants');
-  });
-
-  test('captures button states', async ({ page }) => {
-    await page.goto('/components/button?states=true');
-    await percySnapshot(page, 'Button - States');
-  });
-
-  test('captures dark mode', async ({ page }) => {
-    await page.goto('/components/button');
-    await page.emulateMedia({ colorScheme: 'dark' });
-    await percySnapshot(page, 'Button - Dark Mode');
+    const button = page.locator('[data-testid="button-primary"]');
+    await button.hover();
+    await expect(button).toHaveScreenshot('button-primary-hover.png');
   });
 });
 ```
 
 ## Documentation Standards
 
-### 1. Component README (Component/README.md)
-```markdown
-# Button
+### Component README Template
 
-Primary action trigger component with multiple variants and states.
+````markdown
+# ComponentName
 
-## Usage
+## Overview
+Brief description of what this component does and when to use it.
+
+## Installation
+
+```bash
+npm install @your-org/component-name
+```
+
+## Basic Usage
 
 ```tsx
-import { Button } from '@/components/Button';
+import { ComponentName } from '@your-org/component-name';
 
 function App() {
   return (
-    <Button variant="primary" onClick={handleClick}>
-      Click me
-    </Button>
+    <ComponentName variant="primary" size="md">
+      Content here
+    </ComponentName>
   );
 }
 ```
 
-## Props
+## Props API
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `variant` | `'primary' \| 'secondary' \| 'outline' \| 'ghost' \| 'danger'` | `'primary'` | Visual style variant |
-| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Size of the button |
-| `disabled` | `boolean` | `false` | Disables interaction |
-| `loading` | `boolean` | `false` | Shows loading spinner |
-| `fullWidth` | `boolean` | `false` | Makes button full width |
-| `leftIcon` | `ReactNode` | - | Icon before text |
-| `rightIcon` | `ReactNode` | - | Icon after text |
-| `onClick` | `(event: MouseEvent) => void` | - | Click handler |
-| `children` | `ReactNode` | - | Button content |
+| variant | `'primary' \| 'secondary'` | `'primary'` | Visual style variant |
+| size | `'sm' \| 'md' \| 'lg'` | `'md'` | Component size |
+| isDisabled | `boolean` | `false` | Whether the component is disabled |
+| children | `React.ReactNode` | - | Content to render |
 
 ## Examples
 
-### Basic Button
+### Different Variants
+
 ```tsx
-<Button>Default Button</Button>
+<ComponentName variant="primary">Primary</ComponentName>
+<ComponentName variant="secondary">Secondary</ComponentName>
 ```
 
 ### With Icons
-```tsx
-<Button leftIcon={<PlusIcon />}>Add Item</Button>
-<Button rightIcon={<ArrowRightIcon />}>Continue</Button>
-```
 
-### Loading State
 ```tsx
-<Button loading>Submitting...</Button>
-```
-
-### Full Width
-```tsx
-<Button fullWidth>Full Width Button</Button>
+<ComponentName>
+  <Icon name="star" />
+  With Icon
+</ComponentName>
 ```
 
 ## Accessibility
 
-- Keyboard accessible (Enter/Space to activate)
-- ARIA attributes for loading and disabled states
-- Minimum touch target size: 44x44px
-- Focus indicator visible
-- Color contrast meets WCAG AA standards
+- ✅ Keyboard accessible (Tab, Enter, Space)
+- ✅ Screen reader friendly
+- ✅ WCAG 2.1 Level AA compliant
+- ✅ Focus visible
 
-## Best Practices
+## Browser Support
 
-### Do ✅
-- Use semantic button text that describes the action
-- Use appropriate variants (danger for destructive actions)
-- Include loading states for async operations
-- Provide feedback after button click
+- Chrome (last 2 versions)
+- Firefox (last 2 versions)
+- Safari (last 2 versions)
+- Edge (last 2 versions)
 
-### Don't ❌
-- Use "Click here" as button text
-- Create buttons without click handlers
-- Nest interactive elements inside buttons
-- Use buttons for navigation (use links instead)
-```
+## Related Components
 
-### 2. Storybook Documentation (Component.stories.tsx)
-```typescript
-import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from './Button';
-import { PlusIcon, ArrowRightIcon } from '@icons';
+- [RelatedComponent1](#)
+- [RelatedComponent2](#)
+````
 
-const meta: Meta<typeof Button> = {
-  title: 'Components/Button',
-  component: Button,
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Primary action trigger with multiple variants and states. Fully accessible and keyboard navigable.',
-      },
-    },
-  },
-  tags: ['autodocs'],
-  argTypes: {
-    variant: {
-      control: 'select',
-      options: ['primary', 'secondary', 'outline', 'ghost', 'danger'],
-      description: 'Visual style variant',
-    },
-    size: {
-      control: 'select',
-      options: ['xs', 'sm', 'md', 'lg', 'xl'],
-      description: 'Size of the button',
-    },
-    onClick: { action: 'clicked' },
-  },
-};
+## Performance Optimization
 
-export default meta;
-type Story = StoryObj<typeof Button>;
+### Memoization
 
-// Default story
-export const Default: Story = {
-  args: {
-    children: 'Button',
-  },
-};
-
-// All variants
-export const Variants: Story = {
-  render: () => (
-    <div className="flex gap-4">
-      <Button variant="primary">Primary</Button>
-      <Button variant="secondary">Secondary</Button>
-      <Button variant="outline">Outline</Button>
-      <Button variant="ghost">Ghost</Button>
-      <Button variant="danger">Danger</Button>
-    </div>
-  ),
-};
-
-// All sizes
-export const Sizes: Story = {
-  render: () => (
-    <div className="flex items-center gap-4">
-      <Button size="xs">Extra Small</Button>
-      <Button size="sm">Small</Button>
-      <Button size="md">Medium</Button>
-      <Button size="lg">Large</Button>
-      <Button size="xl">Extra Large</Button>
-    </div>
-  ),
-};
-
-// With icons
-export const WithIcons: Story = {
-  render: () => (
-    <div className="flex gap-4">
-      <Button leftIcon={<PlusIcon />}>Add Item</Button>
-      <Button rightIcon={<ArrowRightIcon />}>Continue</Button>
-    </div>
-  ),
-};
-
-// States
-export const States: Story = {
-  render: () => (
-    <div className="flex gap-4">
-      <Button>Default</Button>
-      <Button disabled>Disabled</Button>
-      <Button loading>Loading</Button>
-    </div>
-  ),
-};
-
-// Full width
-export const FullWidth: Story = {
-  args: {
-    fullWidth: true,
-    children: 'Full Width Button',
-  },
-  parameters: {
-    layout: 'padded',
-  },
-};
-```
-
-### 3. JSDoc Comments
-```typescript
-/**
- * Button component for triggering actions and events.
- * 
- * @component
- * @example
- * ```tsx
- * <Button variant="primary" onClick={handleSubmit}>
- *   Submit Form
- * </Button>
- * ```
- * 
- * @example
- * ```tsx
- * // With loading state
- * <Button loading={isSubmitting}>
- *   {isSubmitting ? 'Submitting...' : 'Submit'}
- * </Button>
- * ```
- */
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(...);
-```
-
-## Best Practices
-
-### 1. Component Composition
-```typescript
-// ✅ Good: Small, composable components
-const Card = ({ children }) => <div className="card">{children}</div>;
-const CardHeader = ({ children }) => <header>{children}</header>;
-const CardBody = ({ children }) => <div>{children}</div>;
-const CardFooter = ({ children }) => <footer>{children}</footer>;
-
-// Usage
-<Card>
-  <CardHeader>Title</CardHeader>
-  <CardBody>Content</CardBody>
-  <CardFooter>Actions</CardFooter>
-</Card>
-
-// ❌ Bad: Monolithic component
-const Card = ({ title, content, footer, showHeader, showFooter, ... }) => {
-  return (
-    <div>
-      {showHeader && <header>{title}</header>}
-      <div>{content}</div>
-      {showFooter && <footer>{footer}</footer>}
-    </div>
-  );
-};
-```
-
-### 2. Prop Defaults
-```typescript
-// ✅ Good: Sensible defaults for common use case
-interface ButtonProps {
-  variant?: 'primary' | 'secondary';
-  size?: 'sm' | 'md' | 'lg';
-}
-
-const Button = ({ variant = 'primary', size = 'md' }) => {...};
-
-// ❌ Bad: No defaults, forcing users to specify everything
-const Button = ({ variant, size }: { variant: string; size: string }) => {...};
-```
-
-### 3. Performance Optimization
-```typescript
-// ✅ Good: Memoize expensive operations
-import { memo, useMemo } from 'react';
-
-const ExpensiveList = memo(({ items }) => {
-  const sortedItems = useMemo(() => {
-    return items.sort((a, b) => a.value - b.value);
-  }, [items]);
-
-  return <ul>{sortedItems.map(item => <li key={item.id}>{item.name}</li>)}</ul>;
+```tsx
+// Memoize expensive child components
+const MemoizedChild = React.memo(ChildComponent, (prevProps, nextProps) => {
+  // Custom comparison
+  return prevProps.id === nextProps.id;
 });
 
-// ❌ Bad: Recalculating on every render
-const ExpensiveList = ({ items }) => {
-  const sortedItems = items.sort((a, b) => a.value - b.value);
-  return <ul>{sortedItems.map(item => <li key={item.id}>{item.name}</li>)}</ul>;
+// Use useMemo for expensive calculations
+const ExpensiveComponent = ({ data }) => {
+  const processedData = useMemo(() => {
+    return data.map(item => expensiveTransform(item));
+  }, [data]);
+  
+  return <List items={processedData} />;
+};
+
+// Use useCallback for event handlers
+const Parent = () => {
+  const handleClick = useCallback((id: string) => {
+    console.log('Clicked:', id);
+  }, []);
+  
+  return <Child onClick={handleClick} />;
 };
 ```
 
-## Quality Checklist
+### Code Splitting
 
-Before considering a component complete:
+```tsx
+// Lazy load heavy components
+const HeavyChart = lazy(() => import('./HeavyChart'));
 
-### Implementation
-- [ ] Component follows established architecture
-- [ ] Props are well-typed with TypeScript
-- [ ] Sensible defaults provided
-- [ ] Styles use design tokens
-- [ ] Performance optimized (memo, useMemo, useCallback where appropriate)
-- [ ] Error handling implemented
-- [ ] Loading states implemented
+function Dashboard() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <HeavyChart data={data} />
+    </Suspense>
+  );
+}
+```
 
-### Accessibility
-- [ ] WCAG 2.1 AA compliant
-- [ ] Keyboard navigation works
-- [ ] ARIA attributes correct
-- [ ] Focus management proper
-- [ ] Color contrast verified
-- [ ] Screen reader tested
-- [ ] Touch targets adequate (44x44px min)
+## Validation Criteria
 
-### Testing
-- [ ] Unit tests written (>80% coverage)
-- [ ] Integration tests for complex interactions
-- [ ] Accessibility tests pass (axe)
-- [ ] Visual regression tests configured
-- [ ] Edge cases tested
-- [ ] Error states tested
+A component is production-ready when:
 
-### Documentation
-- [ ] README.md with examples
-- [ ] Storybook stories created
-- [ ] JSDoc comments complete
-- [ ] Props table accurate
-- [ ] Usage examples clear
-- [ ] Best practices documented
-
-### Code Quality
-- [ ] Linting passes
-- [ ] Type checking passes
-- [ ] No console errors/warnings
-- [ ] Follows team conventions
-- [ ] Code reviewed
-
-## Resources
-
-### Tools
-- **Testing Library**: `@testing-library/react`
-- **Accessibility**: `axe-core`, `@axe-core/react`
-- **Styling**: `tailwindcss`, `class-variance-authority`
-- **Documentation**: `Storybook`
-- **Type Safety**: `TypeScript`
-
-### References
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/)
-- [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/)
-- [Testing Library Docs](https://testing-library.com/docs/react-testing-library/intro/)
+- [ ] **Functionality**: All features work as expected
+- [ ] **Types**: Full TypeScript coverage with no `any` types
+- [ ] **Accessibility**: Passes axe and manual testing
+- [ ] **Tests**: 80%+ code coverage
+- [ ] **Documentation**: Complete README and Storybook stories
+- [ ] **Performance**: No unnecessary re-renders
+- [ ] **Responsive**: Works on mobile, tablet, and desktop
+- [ ] **Browser support**: Works in all target browsers
+- [ ] **Design approval**: Matches design specifications
+- [ ] **Code review**: Approved by at least one other developer
 
 ---
 
-**Skill Version**: 1.0.0  
-**Last Updated**: February 2026  
-**Maintained By**: Agent Skills Repository
+**Last Updated**: 2026-02-18
+**Version**: 1.0.0
